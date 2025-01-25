@@ -122,8 +122,15 @@ if nombre:
         pdf.ln(10)
         pdf.cell(0, 10, f"Nombre de la persona: {nombre}", ln=True)
         pdf.ln(5)
-        for dimension, score in scores.items():
-            pdf.cell(0, 10, f"{dimension}: {score}", ln=True)
+
+        # Añadir preguntas y respuestas al PDF
+        for dimension, qs in questions.items():
+            pdf.set_font("Arial", style="B", size=12)
+            pdf.cell(0, 10, f"{dimension}:", ln=True)
+            pdf.set_font("Arial", size=12)
+            for i, question in enumerate(qs, 1):
+                answer = responses[f"{dimension}_{i}"]
+                pdf.multi_cell(0, 10, f"{i}. {question} (Respuesta: {answer})")
 
         pdf.ln(10)
         pdf.cell(0, 10, "Gráfica:", ln=True)
