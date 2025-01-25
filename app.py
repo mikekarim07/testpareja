@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+from fpdf import FPDF
+from io import BytesIO
 
 # Título de la app
 st.title("Test: Escala del Modelo Triangular del Amor (Sternberg, 1997) – Adaptación")
@@ -101,17 +103,40 @@ if nombre:
         ax.set_ylim(0, 135)
         ax.set_ylabel("Puntaje")
         ax.set_title("Modelo Triangular del Amor")
+        
+        # Guardar gráfica como imagen
+        img_buffer = BytesIO()
+        fig.savefig(img_buffer, format="png")
+        img_buffer.seek(0)
         st.pyplot(fig)
 
-        # Interpretación de resultados
-        st.write("### Interpretación:")
-        if scores["Intimidad"] > scores["Pasión"] and scores["Intimidad"] > scores["Compromiso"]:
-            st.write(f"Tu relación con {nombre} está basada principalmente en la **intimidad**, lo que sugiere una conexión emocional profunda.")
-        elif scores["Pasión"] > scores["Intimidad"] and scores["Pasión"] > scores["Compromiso"]:
-            st.write(f"Tu relación con {nombre} se destaca por una fuerte **pasión**, indicando una atracción romántica y física intensa.")
-        elif scores["Compromiso"] > scores["Intimidad"] and scores["Compromiso"] > scores["Pasión"]:
-            st.write(f"Tu relación con {nombre} está fundamentada en el **compromiso**, lo que refleja un fuerte deseo de mantener la relación a largo plazo.")
-        else:
-            st.write(f"Tu relación con {nombre} es equilibrada, combinando intimidad, pasión y compromiso de manera armónica.")
+        # Generar PDF
+        st.write("### Descargar Resultados:")
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(0, 10, "Resultados del Test: Modelo Triangular del Amor", ln=True, align="C")
+        pdf.ln(10)
+        pdf.cell(0, 10, f"Nombre de la persona: {nombre}", ln=True)
+        pdf.ln(5)
+        for dimension, score in scores.items():
+            pdf.cell(0, 10, f"{dimension}: {score}", ln=True)
+
+        pdf.ln(10)
+        pdf.cell(0, 10, "Gráfica:", ln=True)
+        pdf.image(img_buffer, x=10, y=pdf.get_y() + 5, w=190)
+        pdf.ln(70)
+
+        # Descargar PDF
+        pdf_buffer = BytesIO()
+        pdf.output(pdf_buffer)
+        pdf_buffer.seek(0)
+
+        st.download_button(
+            label="Descargar PDF",
+            data=pdf_buffer,
+            file_name="resultados_test_amor.pdf",
+            mime="application/pdf"
+        )
 else:
     st.write("Por favor, introduce un nombre para personalizar el test.")
