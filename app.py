@@ -105,6 +105,7 @@ if nombre:
         ax.set_ylabel("Puntaje")
         ax.set_title("Modelo Triangular del Amor")
         
+
         # Guardar gráfica en un archivo temporal
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_image:
             fig.savefig(temp_image.name, format="png")
@@ -128,16 +129,18 @@ if nombre:
         pdf.cell(0, 10, "Gráfica:", ln=True)
         pdf.image(temp_image_path, x=10, y=pdf.get_y() + 5, w=190)
 
-        # Descargar PDF
-        pdf_buffer = BytesIO()
-        pdf.output(pdf_buffer)
-        pdf_buffer.seek(0)
+        # Guardar PDF en un archivo temporal
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp_pdf:
+            pdf.output(temp_pdf.name)
+            temp_pdf_path = temp_pdf.name
 
-        st.download_button(
-            label="Descargar PDF",
-            data=pdf_buffer,
-            file_name="resultados_test_amor.pdf",
-            mime="application/pdf"
-        )
+        # Descargar PDF
+        with open(temp_pdf_path, "rb") as f:
+            st.download_button(
+                label="Descargar PDF",
+                data=f.read(),
+                file_name="resultados_test_amor.pdf",
+                mime="application/pdf"
+            )
 else:
     st.write("Por favor, introduce un nombre para personalizar el test.")
