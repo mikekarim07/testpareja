@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from fpdf import FPDF
 from io import BytesIO
+import tempfile
 
 # Título de la app
 st.title("Test: Escala del Modelo Triangular del Amor (Sternberg, 1997) – Adaptación")
@@ -104,10 +105,11 @@ if nombre:
         ax.set_ylabel("Puntaje")
         ax.set_title("Modelo Triangular del Amor")
         
-        # Guardar gráfica como imagen
-        img_buffer = BytesIO()
-        fig.savefig(img_buffer, format="png")
-        img_buffer.seek(0)
+        # Guardar gráfica en un archivo temporal
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_image:
+            fig.savefig(temp_image.name, format="png")
+            temp_image_path = temp_image.name
+
         st.pyplot(fig)
 
         # Generar PDF
@@ -124,8 +126,7 @@ if nombre:
 
         pdf.ln(10)
         pdf.cell(0, 10, "Gráfica:", ln=True)
-        pdf.image(img_buffer, x=10, y=pdf.get_y() + 5, w=190)
-        pdf.ln(70)
+        pdf.image(temp_image_path, x=10, y=pdf.get_y() + 5, w=190)
 
         # Descargar PDF
         pdf_buffer = BytesIO()
